@@ -1,7 +1,7 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Thu, 24 Feb 2022 06:09:51 +0900
+# Last Change: Wed, 03 May 2023 12:07:10 +0900
 # License:     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.

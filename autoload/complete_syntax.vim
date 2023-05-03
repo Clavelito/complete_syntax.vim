@@ -1,8 +1,8 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Thu, 24 Feb 2022 06:09:51 +0900
-# Version:     0.1
+# Last Change: Wed, 03 May 2023 12:07:10 +0900
+# Version:     0.2
 # License:     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.
@@ -32,7 +32,7 @@ const temp_dir = !!getenv('TEMP') && isdirectory(getenv('TEMP'))
       ? getenv('TEMP') : '/tmp'
 const runtime_path = split(&runtimepath, ',')
 const beginpt = '^\s*syn\=\%(tax\)\=\s\+keyword\s\+\S\+'
-const sourcept = '^\s*runtime!\=\s\+\(syntax/[a-z0-9]\+[.]vim\)\s*$'
+const sourcept = '^\s*runtime!\=\s\+syntax/\([a-z0-9]\+[.]vim\)\s*$'
 const complete_syntax_pid = '#' .. getpid()
 var lasttype: string
 
