@@ -1,8 +1,8 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Wed, 03 May 2023 12:07:10 +0900
-# Version:     0.2
+# Last Change: Thu, 13 Aug 2026 07:40:00 +0900
+# Version:     0.3
 # License:     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.
@@ -28,8 +28,7 @@ export def Complete_syntax(): void
   endif
 enddef
 
-const temp_dir = !!getenv('TEMP') && isdirectory(getenv('TEMP'))
-      ? getenv('TEMP') : '/tmp'
+const temp_dir = !!getenv('TEMP') && !!isdirectory(getenv('TEMP')) ? getenv('TEMP') : '/tmp'
 const runtime_path = split(&runtimepath, ',')
 const beginpt = '^\s*syn\=\%(tax\)\=\s\+keyword\s\+\S\+'
 const sourcept = '^\s*runtime!\=\s\+syntax/\([a-z0-9]\+[.]vim\)\s*$'
@@ -48,7 +47,7 @@ def CompleteSyntaxFile(): void
   endif
   var bn = complete_syntax_pid .. &filetype
   var save_dir = getcwd()
-  exec 'silent cd ' .. temp_dir
+  exec 'silent lcd ' .. temp_dir
   if !bufexists(bn) && &modifiable && &ft != 'qf' && &ft != 'netrw'
     var bufnr = bufadd(bn)
     setbufvar(bufnr, '&swapfile', 0)
@@ -62,7 +61,7 @@ def CompleteSyntaxFile(): void
     endfor
     setbufvar(bufnr, 'complete', complete_syntax_pid)
   endif
-  exec 'silent cd ' .. save_dir
+  exec 'silent lcd ' .. save_dir
   SelectCompleteBuffer()
 enddef
 
