@@ -1,8 +1,8 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Thu, 13 Aug 2026 07:40:00 +0900
-# Version:     0.3
+# Last Change: Thu, 13 Aug 2026 14:44:17 +0900
+# Version:     0.4
 # License:     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.
@@ -133,13 +133,12 @@ def FileReadableList(): list<string>
   var flist: list<string>
   var fname: list<string>
   for rtp in runtime_path
-    if isdirectory(rtp .. '/syntax/' .. &filetype)
-      fname = split(system(
-              'ls ' .. rtp .. '/syntax/' .. &filetype .. '/*.vim'), '\n')
+    if !!isdirectory(rtp .. '/syntax/' .. &filetype)
+      fname = split(expand(rtp .. '/syntax/' .. &filetype .. '/*.vim'), '\n')
     endif
     fname = add(fname, rtp .. '/syntax/' .. &filetype .. '.vim')
     for fn in fname
-      if filereadable(fn)
+      if !!filereadable(fn)
         flist = add(flist, fn)
       endif
     endfor
