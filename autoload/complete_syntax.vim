@@ -1,8 +1,8 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Fri, 14 Aug 2026 09:36:00 +0900
-# Version:     0.5
+# Last Change: Wed, 19 Aug 2026 05:46:01 +0900
+# Version:     0.6
 # License:     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.
@@ -31,6 +31,7 @@ enddef
 const temp_dir = !!getenv('TEMP') && !!isdirectory(getenv('TEMP')) ? getenv('TEMP') : '/tmp'
 const runtime_path = split(&runtimepath, ',')
 const beginpt = '^\s*syn\=\%(tax\)\=\s\+keyword\s\+\S\+'
+const matchpt = '^\s*syn\=\%(tax\)\=\s\+match\s\+\S\+\s\+.\{-}\\<[^>]\+\\>'
 const sourcept = '^\s*runtime!\=\s\+syntax/\([a-z0-9]\+[.]vim\)\s*$'
 const complete_syntax_pid = '#' .. getpid()
 var lasttype: string
@@ -76,6 +77,8 @@ def GetWordsList(fn: string): list<string>
     elseif flag == sum && line =~ '^\s*\\'
       extend(wordlist, ParseLine(line, '^\s*\\'))
       flag = sum + 1
+    elseif line =~# matchpt
+      extend(wordlist, ParseLine2(line))
     elseif line =~# sourcept
       var rtp = substitute(fn, '[^/]\+$', '', '')
       var fn2 = substitute(line, sourcept, rtp .. '\1', '')
@@ -93,6 +96,13 @@ def ParseLine(line: string, pt: string): list<string>
         .. '\|\s\%(nextgroup\|containedin\)=\S\+'
         .. '\|\s\%(skipempty\|skipwhite\|skipnl\|contained\)\>', '', 'g')
   str = substitute(str, '\s\(\S\+\)\[\(\S\+\)\]', ' \1 \1\2', 'g')
+  return split(str)
+enddef
+
+def ParseLine2(line: string): list<string>
+  var str = substitute(line, '^[^<]\+\\<\([^>]\+\)\\>.*$', '\1', '')
+  str = substitute(str, '\\[_%]\=.', ' ', 'g')
+  str = substitute(str, '\S*[^_A-Za-z0-9[:blank:]]\S*\|\<\w\>', '', 'g')
   return split(str)
 enddef
 
