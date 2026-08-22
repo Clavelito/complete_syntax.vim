@@ -1,8 +1,8 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Wed, 19 Aug 2026 05:46:01 +0900
-# Version:     0.6
+# Last Change: Sat, 22 Aug 2026 14:29:00 +0900
+# Version:     0.7
 # License:     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.
@@ -19,12 +19,18 @@ const cpo_save = &cpo
 set cpo&vim
 
 export def Complete_syntax(): void
-  if !empty(FileReadableList())
+  if !!FileReadableList() && &modifiable && &ft != 'qf' && &ft != 'netrw'
     augroup CompleteSyntax
       autocmd!
       autocmd BufEnter * SelectCompleteBuffer(true)
     augroup END
-    SetMap()
+    if exists('*timer_start')
+      timer_start(0, 'CompleteSyntaxFile')
+    elseif exists('+autocomplete') && &autocomplete
+      CompleteSyntaxFile()
+    else
+      SetMap()
+    endif
   endif
 enddef
 
@@ -42,8 +48,8 @@ def SetMap(): void
   SelectCompleteBuffer(true)
 enddef
 
-def CompleteSyntaxFile(): void
-  if empty(&filetype)
+def CompleteSyntaxFile(...dummy: list<number>): void
+  if !&filetype
     return
   endif
   var bn = complete_syntax_pid .. &filetype
@@ -92,7 +98,7 @@ def GetWordsList(fn: string): list<string>
 enddef
 
 def ParseLine(line: string, pt: string): list<string>
-  var str = substitute(line, pt
+  var str = substitute(line, '\C' .. pt
         .. '\|\s\%(nextgroup\|containedin\)=\S\+'
         .. '\|\s\%(skipempty\|skipwhite\|skipnl\|contained\)\>', '', 'g')
   str = substitute(str, '\s\(\S\+\)\[\(\S\+\)\]', ' \1 \1\2', 'g')
@@ -107,31 +113,31 @@ def ParseLine2(line: string): list<string>
 enddef
 
 def SelectCompleteBuffer(...args: list<bool>): string
-  if !empty(args) && lasttype == &filetype
+  if !!args && lasttype == &filetype
     return ''
   endif
   lasttype = &filetype
   const compbufpt = complete_syntax_pid .. &filetype .. '$'
-  var flag = 0
+  var flag: bool
   for dic in getbufinfo()
     if VariableCompleteExists(dic)
       if dic['name'] =~# compbufpt
         setbufvar(dic['bufnr'], '&buflisted', 1)
-        flag = 1
+        flag = true
       else
         setbufvar(dic['bufnr'], '&buflisted', 0)
       endif
-      if empty(getbufvar(dic['bufnr'], '&buftype'))
+      if !getbufvar(dic['bufnr'], '&buftype')
         setbufvar(dic['bufnr'], '&buftype', 'nofile')
       endif
-      if !empty(dic['windows'])
+      if !!dic['windows']
         setbufvar(dic['bufnr'], '&hidden', 1)
         bnext
         SelectCompleteBuffer(true)
       endif
     endif
   endfor
-  if !flag && empty(args)
+  if !flag && !args
     CompleteSyntaxFile()
     iunmap <buffer> <C-P>
     iunmap <buffer> <C-N>
