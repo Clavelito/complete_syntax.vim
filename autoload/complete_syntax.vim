@@ -1,8 +1,8 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Sat, 22 Aug 2026 14:29:00 +0900
-# Version:     0.7
+# Last Change: Sun, 23 Aug 2026 19:47:00 +0900
+# Version:     0.8
 # License:     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.
@@ -24,9 +24,9 @@ export def Complete_syntax(): void
       autocmd!
       autocmd BufEnter * SelectCompleteBuffer(true)
     augroup END
-    if exists('*timer_start')
+    if exists('*timer_start') && !&readonly
       timer_start(0, 'CompleteSyntaxFile')
-    elseif exists('+autocomplete') && &autocomplete
+    elseif exists('+autocomplete') && &autocomplete && !&readonly
       CompleteSyntaxFile()
     else
       SetMap()
