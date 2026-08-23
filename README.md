@@ -6,7 +6,7 @@ Use CTRL-N and CTRL-P as you would for completion in the current buffer.
 ### Configuration
 Add the following line to vimrc.
 ~~~vim
-autocmd FileType * if exists(':CompleteSyntax') | exe 'CompleteSyntax' | endif
+autocmd FileType * if exists(':CompleteSyntax') == 2 | exe 'CompleteSyntax' | endif
 ~~~
 ### License
 Apache License, Version2.0
