@@ -1,8 +1,8 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Sun, 23 Aug 2026 19:47:00 +0900
-# Version:     0.8
+# Last Change: Thu, 27 Aug 2026 12:05:00 +0900
+# Version:     0.9
 # License:     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.
@@ -107,9 +107,21 @@ enddef
 
 def ParseLine2(line: string): list<string>
   var str = substitute(line, '^[^<]\+\\<\([^>]\+\)\\>.*$', '\1', '')
+  str = substitute(str, '\(\w*\)\(\w\)\\[?=]\(\w*\)', ' \1\2\3 \1\3', 'g')
+  str = substitute(str, '\(\w*\)\\%\=(\(\w\+\)\\)\\[?=]\(\w*\)', ' \1\2\3 \1\3', 'g')
+  str = substitute(str, '\(\w\+\)\\%\=(\(\%(\w\+\|\\|\)\+\)\\)', '\=ParseStr(submatch(1), submatch(2))', 'g')
   str = substitute(str, '\\[_%]\=.', ' ', 'g')
   str = substitute(str, '\S*[^_A-Za-z0-9[:blank:]]\S*\|\<\w\>', '', 'g')
   return split(str)
+enddef
+
+def ParseStr(head: string, item: string): string
+  const items = split(item, '\\|')
+  var line: string
+  for str in items
+    line ..= head .. str .. ' '
+  endfor
+  return line
 enddef
 
 def SelectCompleteBuffer(...args: list<bool>): string
