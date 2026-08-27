@@ -1,8 +1,8 @@
 vim9script noclear
 
 # Author:      Clavelito <maromomo@hotmail.com>
-# Last Change: Thu, 27 Aug 2026 12:05:00 +0900
-# Version:     0.9
+# Last Change: Fri, 28 Aug 2026 07:10:30 +0900
+# Version:     0.10
 # License:     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Description: Keyword completion is performed using syntax highlighting files.
@@ -37,7 +37,7 @@ enddef
 const temp_dir = !!getenv('TEMP') && !!isdirectory(getenv('TEMP')) ? getenv('TEMP') : '/tmp'
 const runtime_path = split(&runtimepath, ',')
 const beginpt = '^\s*syn\=\%(tax\)\=\s\+keyword\s\+\S\+'
-const matchpt = '^\s*syn\=\%(tax\)\=\s\+match\s\+\S\+\s\+.\{-}\\<[^>]\+\\>'
+const matchpt = '^\s*syn\=\%(tax\)\=\s\+match\s\+\S\+\s\+.\{-}\\<\([^>]\+\)\\>.*$'
 const sourcept = '^\s*runtime!\=\s\+syntax/\([a-z0-9]\+[.]vim\)\s*$'
 const complete_syntax_pid = '#' .. getpid()
 var lasttype: string
@@ -84,10 +84,10 @@ def GetWordsList(fn: string): list<string>
       extend(wordlist, ParseLine(line, '^\s*\\'))
       flag = sum + 1
     elseif line =~# matchpt
-      extend(wordlist, ParseLine2(line))
+      extend(wordlist, ParseLine2(line, matchpt))
     elseif line =~# sourcept
       var rtp = substitute(fn, '[^/]\+$', '', '')
-      var fn2 = substitute(line, sourcept, rtp .. '\1', '')
+      var fn2 = substitute(line, '\C' .. sourcept, rtp .. '\1', '')
       if filereadable(fn2)
         extend(wordlist, GetWordsList(fn2))
       endif
@@ -105,8 +105,8 @@ def ParseLine(line: string, pt: string): list<string>
   return split(str)
 enddef
 
-def ParseLine2(line: string): list<string>
-  var str = substitute(line, '^[^<]\+\\<\([^>]\+\)\\>.*$', '\1', '')
+def ParseLine2(line: string, pt: string): list<string>
+  var str = substitute(line, '\C' .. pt, '\1', '')
   str = substitute(str, '\(\w*\)\(\w\)\\[?=]\(\w*\)', ' \1\2\3 \1\3', 'g')
   str = substitute(str, '\(\w*\)\\%\=(\(\w\+\)\\)\\[?=]\(\w*\)', ' \1\2\3 \1\3', 'g')
   str = substitute(str, '\(\w\+\)\\%\=(\(\%(\w\+\|\\|\)\+\)\\)', '\=ParseStr(submatch(1), submatch(2))', 'g')
